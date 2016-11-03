@@ -2,8 +2,49 @@
  <html>
  <head>
  <meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
+ <style>
+table {
+    width: 60%; 
+   }
+   .col1 {
+    width: 30px; 
+	background:  #bfbfbf;
+   }
+.cellbut {width:100%}
+.newNote {
+height: 100px; 
+width: 99%; 
+background: #f5f5f0; 
+border: 1px solid #C1C1C1; 
+overflow-x: scroll; 
+overflow-y: scroll; 
+resize: none;
+}
+.scroll {
+height: 100px; 
+width: 400px; 
+background: #e0e0d1; 
+border: 1px solid #C1C1C1; 
+overflow-x: scroll; 
+overflow-y: scroll; 
+}
+.hashtag{
+background: #ffff00;
+}
+
+.nav {
+    width: 100%;
+    height: 30em;
+    line-height: 2em;
+    border: 1px solid #ccc;
+    padding: 0;
+    margin: 0;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+</style>
+ 
  <title>Заметки</title>
- <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
   <script type="text/javascript" src="logic.js"></script>
  <script type="text/javascript">
    function init()
@@ -21,23 +62,23 @@
    
    function onAddClick()
   {
-   var Description = $('#description').val();
+   var Description = document.getElementById('description').value;
    //если текстовое поле не заполнено
-   if($("#description").val() == '') 
+   if(Description == '') 
    {
-    $('#alert').html("<strong>Внимание!</strong> Введите запись в текстовое поле.");
-    $('#alert').fadeIn().delay(3000).fadeOut();
+    document.getElementById('alert').html("<strong>Внимание!</strong> Введите запись в текстовое поле.");
+    document.getElementById('alert').fadeIn().delay(3000).fadeOut();
     return false;
    }
 
    allNotes.push(new Note(Description,parseTags(Description)));
    saveData();
-   $('#form')[0].reset();
+   //document.getElementById('descriprtion').value = "";
    //updateNotes();
    return false;
 }
 
-function updateData()
+/*function updateData()
 {
 	var notes = document.getElementById("notes");
 	var tags =  document.getElementById("tags");
@@ -46,69 +87,81 @@ function updateData()
 	reloadData();
 	console.log(notes.innerHTML)
 	for (var i=0; i<allNotes.length;i++)
-		notes.innerHTML="<textarea id='txtNote"+i+"' readonly>"+ allNotes[i].content + "</textarea>?<iframe id='frame"+i+"' style='display:none;'></iframe><div id='noteEditDel"+i+"'><button onClick='onEditNoteClick("+i+");'>Править</button><button onClick='onDeleteNoteClick("+i+");'>X</button></div>"
+		notes.innerHTML="<div id='txtNote"+i+"' class='scroll' >"+ allNotes[i].content + "</div><div id='noteEditDel"+i+"'><button onClick='onEditNoteClick("+i+");'>Править</button><button onClick='onDeleteNoteClick("+i+");'>X</button></div>"
 		+"<div id='noteOkCancel"+i+"' style='display:none;'><button onClick='onSaveNoteClick("+i+");'>Сохранить</button><button id='btnCancel"+i+"' onClick='onCancelNoteClick("+i+");'>Отмена</button><br></div> tags:"+allNotes[i].tags+"<br><br>"+notes.innerHTML;
 	for (var i=0; i<allTags.length;i++)
-		tags.innerHTML="<p id='pTag"+i+"' onclick=filterByTag("+i+")>"+allTags[i]+" <button onClick='onDeleteTagClick("+i+");'>X</button></p><br>"+tags.innerHTML;		
+		tags.innerHTML="<p id='pTag"+i+"' onclick=updateData("+i+")>"+allTags[i]+" <button onClick='onDeleteTagClick("+i+");'>X</button></p>"+tags.innerHTML;		
+}*/
+
+function updateData(tagIndex)
+{				
+	var notes = document.getElementById("notes");
+	var tags =  document.getElementById("tags");
+	notes.innerHTML="";
+	tags.innerHTML="";
+	reloadData();
+	var tag;
+	if(tagIndex>=0)
+	   tag = allTags[tagIndex];
+		console.log("tag="+tag+",index="+tagIndex)
+	for (var i=0; i<allNotes.length;i++)
+	if(!tag || (allNotes[i].tags.indexOf(tag)!=-1))
+		notes.innerHTML="<div id='txtNote"+i+"' class='scroll' >"+ allNotes[i].content + "</div><div id='noteEditDel"+i+"'><button onClick='onEditNoteClick("+i+");'>Править</button><button onClick='onDeleteNoteClick("+i+");'>X</button></div>"
+		+"<div id='noteOkCancel"+i+"' style='display:none;'><button onClick='onSaveNoteClick("+i+");'>Сохранить</button><button id='btnCancel"+i+"' onClick='onCancelNoteClick("+i+");'>Отмена</button><br></div> tags:"+allNotes[i].tags+"<br><br>"+notes.innerHTML;
+	for (var i=0; i<allTags.length;i++)
+		tags.innerHTML="<p id='pTag"+i+"' onclick=updateData("+i+")>"+allTags[i]+" <button onClick='onDeleteTagClick("+i+");'>X</button></p>"+tags.innerHTML;		
 }
 
 function onEditNoteClick(index)
 {
     var noteTextArea = document.getElementById("txtNote"+index);
-	noteTextArea.readOnly = false;
+	noteTextArea.contentEditable = "true";
 	
-	var container = document.createElement("DIV");
-	noteTextArea.parentNode.insertBefore(container, noteTextArea); 
-    container.appendChild(noteTextArea);
-    noteTextArea.style.display = 'none';
+	/*noteTextArea.addEventListener('keyup', function (event) {
+    var text = this.textContent;
+    var highlighted = text.replace(/(#\w+)/g, '<span class="hashtag">$1</span>');
+    this.innerHTML = highlighted;
+    });*/
 
-   var iFrame =  document.getElementById('frame'+index);
-   iFrame.contentWindow.document.designMode = "On";
-   iFrame.style.display = "block";
-   var iFrameBody;
-   if ( iFrame.contentDocument ) 
-   { // FF
-     iFrameBody = iFrame.contentDocument.getElementsByTagName('body')[0];
-   }
-   else if ( iFrame.contentWindow ) 
-   { // IE
-     iFrameBody = iFrame.contentWindow.document.getElementsByTagName('body')[0];
-   }
-    
-	var text = noteTextArea.value;
-	
+	var text = noteTextArea.textContent;
+
+    var highlighted=text;	
 	for (var i=0;i<allNotes[index].tags.length;i++)
 	{
-	console.log(text)
-	    text = text.replace(new RegExp(allNotes[index].tags[i], 'i'),"<b>"+allNotes[index].tags[i]+"</b>")	
-		
+	    highlighted = text.replace(new RegExp(allNotes[index].tags[i], 'i'),'<span class="hashtag">'+allNotes[index].tags[i]+'</span>')		
 	}
-	console.log(text)	
-	iFrameBody.innerHTML = text;	
-
+    noteTextArea.innerHTML = highlighted;
     document.getElementById("noteEditDel"+index).style.display = "none";
     document.getElementById("noteOkCancel"+index).style.display = "block";
+	
+}
+
+function redoHighlight(text,index)
+{
+	for (var i=0;i<allNotes[index].tags.length;i++)
+	{
+	    text = text.replace(/<span.*?>.*?<\/span>/ig,allNotes[index].tags[i])		
+	}
+	return text;
 }
 
 function onCancelNoteClick(index)
 {
-    document.getElementById("txtNote"+index).readOnly = true;
-	document.getElementById("txtNote"+index).style.display = "block";
-	document.getElementById('frame'+index).style.display = "none";
+    document.getElementById("txtNote"+index).contentEditable = "false";
 	
-	//document.getElementById("txtNote"+index).value=allNotes[index].content;
+	document.getElementById("txtNote"+index).innerHTML=allNotes[index].content;
 	document.getElementById("noteEditDel"+index).style.display = "block";
     document.getElementById("noteOkCancel"+index).style.display = "none";
 }
 
 function onSaveNoteClick(index)
 {
-    document.getElementById("txtNote"+index).readOnly = true;
-	document.getElementById("txtNote"+index).style.display = "block";
-	document.getElementById('frame'+index).style.display = "none";
-	
-
-	allNotes[index].content=document.getElementById('frame'+index).contentDocument.getElementsByTagName('body')[0].innerHTML;
+    document.getElementById("txtNote"+index).contentEditable = "false";
+	var text = document.getElementById("txtNote"+index).innerHTML;
+	console.log("text before="+text);
+	text = redoHighlight(text,index);
+	console.log("text after="+text);
+	allNotes[index].content=text;
 	allNotes[index].tags=parseTags(allNotes[index].content);
 	document.getElementById("noteEditDel"+index).style.display = "block";
     document.getElementById("noteOkCancel"+index).style.display = "none";
@@ -121,14 +174,6 @@ function onDeleteNoteClick(index)
 	allNotes.splice(index,1);
 	saveData();
 	updateData();
-}
-function filterByTag(index)
-{
-   $('#notes').html('');
-   var tag = allTags[index];
-   	for (var i=0; i<allNotes.length;i++)
-		if(allNotes[i].tags.indexOf(tag)!=-1)
-			$('#notes').prepend("<textarea readonly>"+ allNotes[i].content + "</textarea readonly><br>"+"tags:"+allNotes[i].tags+"<br>");
 }
 
 function onDeleteTagClick(index)
@@ -145,16 +190,15 @@ function onDeleteTagClick(index)
 
 function onAddTagClick()
 {
-   var newTag = $('#newTag').val();
-   if($("#newTag").val() == '') 
+   var newTag = document.getElementById('newTag').value;
+   if(newTag == '') 
    {
-    $('#alert').html("<strong>Внимание!</strong> Введите запись в текстовое поле.");
-    $('#alert').fadeIn().delay(3000).fadeOut();
+    document.getElementById('alert').html("<strong>Внимание!</strong> Введите запись в текстовое поле.");
+    document.getElementById('alert').fadeIn().delay(3000).fadeOut();
     return false;
    }
    allTags.push(newTag);
    saveData();
-   $('#form')[0].reset();
    return false;
 }
 
@@ -167,27 +211,33 @@ function onShowAllTagsClick()
  </head>
  
  <body onLoad="init();">
-   <table border="1">
+   <table class="table" >
    <tr>
-	   <td>
+	   <td class="col1">
 		   Добавить новый тег: <br>
 		    <form id="formTags" action="#" method="POST">
-			  <input id="newTag" name="newTag" type="text"/>
-			  <input id="addTag" type="submit" value="ОК" onClick="onAddTagClick();"/>
+			  <input id="newTag" name="newTag" type="text" style="background: #f5f5f0;"/>
+			  <input id="addTag" type="submit" value="ОК" align="right" onClick="onAddTagClick();"/>
 		    </form> <br>
-			<button id="showAllTags" onClick="onShowAllTagsClick();">Все</button>
-		    <ul id="tags"></ul>
+			<button id="showAllTags" class="cellbut" onClick="onShowAllTagsClick();">Сбросить фильтры</button>			
 	   </td>
-		<td><section>
-		  <form id="form" action="#" method="POST">
-			  <textarea id="description" name="description"></textarea>
-			  <input id="add" type="submit" value="Добавить запись" onClick="onAddClick();"/>
-			  <button id="clear" onClick="onClearClick();">Очистить список</button>
+		<td >
+			<form id="form" action="#" method="POST">
+			  <textarea id="description" class="newNote" name="description" ></textarea><br>
+			  <input id="add" class="cellbut" type="submit" value="Добавить запись" onClick="onAddClick();"/>
+			  <button id="clear" class="cellbut" onClick="onClearClick();">Очистить список</button>
 		  </form>
-		  <div id="alert"></div>
-		  <ul id="notes"></ul>
-		</section></td>
+		</td>
 	</tr>	
+	<tr>
+		<td class="col1" valign ="top">
+		    <ul id="tags" class="nav"></ul>			
+		</td>
+		<td valign ="top">
+		  <div id="alert"></div>
+		  <ul id="notes" class="nav"></ul>			
+		</td>	
+	</tr>
 	</table>
  </body>
  
