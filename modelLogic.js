@@ -5,26 +5,12 @@ function Note(content, tags)
 	this.tags = tags;
 }
 
-//объект Note
-Note.prototype = 
-{
-	/*includes: function(x) { 
-		return this.from <= x && x <= this.to; },
-
-	foreach: function(func, objectToWrite) {
-		for(var x = Math.ceil(this.from); x <= this.to; x++) 
-			func.call(objectToWrite, x);
-	},
-
-	toString: function() { 
-		return "Диапазон (" + this.from + "..." + this.to + ")"; 
-	}*/
-	
-};
+//объект Note, хранит текст заметки и список тегов
+Note.prototype = {	};
 
 //список всех заметок
 var allNotes;
-//список всех тэгов
+//список всех тегов
 var allTags;
 
 function logicInit()
@@ -33,18 +19,7 @@ function logicInit()
 	allTags = new Array();
 }
 
-/*function getAllNotes()
-{
-	if(!localStorage.getItem('allNotes')) 
-	{
-		var allNotes = new Array();		
-		saveNotes(allNotes);
-	}
-	var retAllNotes = JSON.parse(localStorage.getItem('allNotes'));
-	//console.log(retAllNotes[0].content);
-	return retAllNotes;
-}*/
-
+//возвращает список тегов, содержащихся в тексте
 function parseTags(content)
 {
 	var resTags = new Array();
@@ -60,6 +35,7 @@ function parseTags(content)
 	return resTags;
 }
 
+//работает с localStorage, сохраняет список заметок и тегов
 function saveData()
 {
 	var sAllNotes = JSON.stringify(allNotes);
@@ -68,6 +44,7 @@ function saveData()
 	localStorage.setItem('allTags', sAllTags);
 }
 
+//работает с localStorage, извлекает список заметок и тегов
 function reloadData()
 {
 	if(localStorage.getItem('allNotes')) 
